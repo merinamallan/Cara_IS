@@ -1,0 +1,19 @@
+{
+  "name": "ecommerce-website-main",
+  "version": "1.0.0",
+  "description": "<div align = \"center\">     <img src=\"./img/icon1.png\" alt=\"Logo\" width=\"50px\"> </div>",
+  "main": "script.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/merinamallan/Cara_IS.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/merinamallan/Cara_IS/issues"
+  },
+  "homepage": "https://github.com/merinamallan/Cara_IS#readme"
+}
