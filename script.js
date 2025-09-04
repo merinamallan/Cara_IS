@@ -73,19 +73,20 @@ document.querySelectorAll(".add-to-cart").forEach((button) => {
     const size = sizeElement ? sizeElement.value : null;
 
     // === Salesforce Interaction push ===
-    if (typeof _etmc !== "undefined") {
-      _etmc.push([
-        "trackEvent",
-        {
-          eventType: "addToCart",
-          productName: name,
+    if (window.SalesforceInteractions) {
+      Evergage.sendEvent("AddToCart", {
+        product: {
+          name: name,
           price: price,
-          quantity: 1,
           imageUrl: image,
-          size: size
+          size: size,
+          quantity: 1
         }
-      ]);
+      });
+    } else {
+      console.warn("Evergage is not defined");
     }
+    // === End Salesforce Interaction push ===
 
     // === Also update your local cart (existing logic) ===
     let cart = JSON.parse(localStorage.getItem("cartItems")) || [];
