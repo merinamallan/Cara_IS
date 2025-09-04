@@ -59,8 +59,47 @@ document.addEventListener("DOMContentLoaded", () => {
   updateSubtotal();
 });
 
-const checkoutBtn = document.getElementById("checkout-btn");
 
+// === Add this block before checkoutBtn ===
+document.querySelectorAll(".add-to-cart").forEach((button) => {
+  button.addEventListener("click", function () {
+    const productCard = this.closest(".pro"); // adjust selector to your product container
+    const name = productCard.querySelector("h5").textContent;
+    const price = parseFloat(productCard.querySelector(".price").textContent.replace("₹", ""));
+    const image = productCard.querySelector("img").src;
+
+    // Capture size if available
+    const sizeElement = productCard.querySelector("select");
+    const size = sizeElement ? sizeElement.value : null;
+
+    // === Salesforce Interaction push ===
+    if (typeof _etmc !== "undefined") {
+      _etmc.push([
+        "trackEvent",
+        {
+          eventType: "addToCart",
+          productName: name,
+          price: price,
+          quantity: 1,
+          imageUrl: image,
+          size: size
+        }
+      ]);
+    }
+
+    // === Also update your local cart (existing logic) ===
+    let cart = JSON.parse(localStorage.getItem("cartItems")) || [];
+    cart.push({ name, price, image, size, quantity: 1 });
+    localStorage.setItem("cartItems", JSON.stringify(cart));
+
+    alert(`${name} added to cart ✅`);
+  });
+});
+// === End Salesforce Add to Cart tracking ===
+
+
+// Your existing checkout button logic
+const checkoutBtn = document.getElementById("checkout-btn");
 if (checkoutBtn) {
   checkoutBtn.addEventListener("click", () => {
     let cart = JSON.parse(localStorage.getItem("cartItems")) || [];
@@ -70,13 +109,10 @@ if (checkoutBtn) {
       return;
     }
 
-    // Clear the cart
     localStorage.removeItem("cartItems");
-
-    // Show success message
     alert("✅ Purchase successful! Thank you for shopping.");
-
-    // Reload page to update view
     location.reload();
   });
 }
+
+
