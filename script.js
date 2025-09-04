@@ -14,32 +14,7 @@ if(close) {
   })
 };
 
-document.addEventListener("DOMContentLoaded", () => {
-  // Select the Shop link
-  const shopLink = document.querySelector('a[href="shop.html"]');
 
-  // Add a click event listener
-  shopLink.addEventListener("click", (event) => {
-    event.preventDefault(); // optional: stops the default navigation
-
-    console.log("Shop link clicked!"); 
-
-    // 👉 Example: send event to SalesforceInteractions
-    if (window.SalesforceInteractions) {
-      window.SalesforceInteractions.sendEvent({
-        interaction: {
-          name: "ShopLinkClicked",
-          properties: {
-            page: "navbar"
-          }
-        }
-      });
-    }
-
-    // continue with navigation (if you stopped it above)
-    window.location.href = shopLink.getAttribute("href");
-  });
-});
 
 
 document.addEventListener("DOMContentLoaded", () => {

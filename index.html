@@ -453,5 +453,31 @@
     </footer>
 
     <script src="script.js"></script>
+
+    <script>
+      document.addEventListener("DOMContentLoaded", () => {
+        // Select the Shop link
+        const shopLink = document.querySelector('a[href="shop.html"]');
+
+        // Add a click event listener
+        shopLink.addEventListener("click", (event) => {
+          event.preventDefault();
+
+          console.log("Shop link clicked!");
+
+          // 👉 Example: send event to SalesforceInteractions
+          if (window.SalesforceInteractions) {
+            window.SalesforceInteractions.sendEvent({
+              interaction: {
+                name: "Shop Page",
+              },
+            });
+          }
+
+          // continue with navigation (if you stopped it above)
+          window.location.href = shopLink.getAttribute("href");
+        });
+      });
+    </script>
   </body>
 </html>
