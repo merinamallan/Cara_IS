@@ -275,7 +275,7 @@
           const quantity = document.querySelector(
             ".single-pro-details input[type='number']"
           ).value;
-          const size = document.getElementById("size").value; // 👈 Capture selected size
+          const size = document.getElementById("size").value;
 
           if (size === "Select Size") {
             alert("⚠️ Please select a size before adding to cart.");
@@ -287,7 +287,7 @@
             price: productPrice,
             image: productImage,
             quantity: parseInt(quantity, 10),
-            size: size, // 👈 Store size in product object
+            size: size,
           };
 
           // Get existing cart or create new
@@ -303,17 +303,24 @@
 
           // Send data to Evergage
           if (window.SalesforceInteractions) {
-            Evergage.sendEvent("AddToCart", {
-              product: {
-                name: name,
-                price: price,
-                imageUrl: image,
-                size: size,
-                quantity: quantity,
+            window.SalesforceInteractions.sendEvent({
+              interaction: {
+                name: SalesforceInteractions.CartInteractionName.AddToCart,
+                lineItem: {
+                  product: {
+                    name: name,
+                    price: price,
+                    imageUrl: image,
+                    attributes: {
+                      size: size,
+                    },
+                  },
+                  quantity: quantity,
+                },
               },
             });
           } else {
-            console.warn("Evergage is not defined");
+            console.warn("SalesforceInteraction is not defined");
           }
         });
       }

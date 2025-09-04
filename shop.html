@@ -414,17 +414,24 @@
 
           // Send data to Evergage
           if (window.SalesforceInteractions) {
-            Evergage.sendEvent("AddToCart", {
-              product: {
-                name: name,
-                price: price,
-                imageUrl: image,
-                size: size,
-                quantity: quantity,
+            window.SalesforceInteractions.sendEvent({
+              interaction: {
+                name: SalesforceInteractions.CartInteractionName.AddToCart,
+                lineItem: {
+                  product: {
+                    name: name,
+                    price: price,
+                    imageUrl: image,
+                    attributes: {
+                      size: size,
+                    },
+                  },
+                  quantity: quantity,
+                },
               },
             });
           } else {
-            console.warn("Evergage is not defined");
+            console.warn("SalesforceInteraction is not defined");
           }
         });
       });
