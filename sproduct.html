@@ -302,26 +302,6 @@
           alert(`✅ ${product.name} (${size}) added to Cart!`);
 
           // Send data to Evergage
-          if (window.SalesforceInteractions) {
-            window.SalesforceInteractions.sendEvent({
-              interaction: {
-                name: SalesforceInteractions.CartInteractionName.AddToCart,
-                lineItem: {
-                  product: {
-                    name: name,
-                    price: price,
-                    imageUrl: image,
-                    attributes: {
-                      size: size,
-                    },
-                  },
-                  quantity: quantity,
-                },
-              },
-            });
-          } else {
-            console.warn("SalesforceInteraction is not defined");
-          }
         });
       }
     </script>

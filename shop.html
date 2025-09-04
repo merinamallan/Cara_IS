@@ -409,30 +409,10 @@
           // Save back to localStorage
           localStorage.setItem("cartItems", JSON.stringify(cart));
 
-          alert(`✅ ${product.name} added to Cart! `);
-          alert(" But select a size first."); // Notify user
+          // alert(`✅ ${product.name} added to Cart! `);
+          alert(" Select a size first."); // Notify user
 
           // Send data to Evergage
-          if (window.SalesforceInteractions) {
-            window.SalesforceInteractions.sendEvent({
-              interaction: {
-                name: SalesforceInteractions.CartInteractionName.AddToCart,
-                lineItem: {
-                  product: {
-                    name: name,
-                    price: price,
-                    imageUrl: image,
-                    attributes: {
-                      size: size,
-                    },
-                  },
-                  quantity: quantity,
-                },
-              },
-            });
-          } else {
-            console.warn("SalesforceInteraction is not defined");
-          }
         });
       });
     </script>
