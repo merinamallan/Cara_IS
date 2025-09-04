@@ -300,6 +300,21 @@
           localStorage.setItem("cartItems", JSON.stringify(cart));
 
           alert(`✅ ${product.name} (${size}) added to Cart!`);
+
+          // Send data to Evergage
+          if (window.SalesforceInteractions) {
+            Evergage.sendEvent("AddToCart", {
+              product: {
+                name: name,
+                price: price,
+                imageUrl: image,
+                size: size,
+                quantity: quantity,
+              },
+            });
+          } else {
+            console.warn("Evergage is not defined");
+          }
         });
       }
     </script>

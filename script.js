@@ -80,23 +80,11 @@ document.querySelectorAll(".add-to-cart").forEach((button) => {
     alert(`${name} added to cart ✅`);
 
     // === Salesforce Interaction push ===
-    if (window.SalesforceInteractions) {
-      Evergage.sendEvent("AddToCart", {
-        product: {
-          name: name,
-          price: price,
-          imageUrl: image,
-          size: size,
-          quantity: 1
-        }
-      });
-    } else {
-      console.warn("Evergage is not defined");
-    }
+    
     // === End Salesforce Interaction push ===
   });
 });
-// === End Salesforce Add to Cart tracking ===
+
 
 
 // Your existing checkout button logic
