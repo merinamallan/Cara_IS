@@ -456,50 +456,24 @@
 
     <script>
       document.addEventListener("DOMContentLoaded", () => {
-        // Select the Shop link
-        const shopLink = document.querySelector('a[href="index.html"]');
+        const navLinks = document.querySelectorAll("#navbar a");
 
-        // Add a click event listener
-        shopLink.addEventListener("click", (event) => {
-          event.preventDefault();
+        navLinks.forEach((link) => {
+          link.addEventListener("click", function (event) {
+            event.preventDefault();
 
-          console.log("Home link clicked!");
+            console.log(`${this.textContent} link clicked!`);
 
-          // 👉 Example: send event to SalesforceInteractions
-          if (window.SalesforceInteractions) {
-            window.SalesforceInteractions.sendEvent({
-              interaction: {
-                name: "Home Page",
-              },
-            });
-          }
+            if (window.SalesforceInteractions) {
+              window.SalesforceInteractions.sendEvent({
+                interaction: {
+                  name: "Home page",
+                },
+              });
+            }
 
-          // continue with navigation (if you stopped it above)
-          window.location.href = shopLink.getAttribute("href");
-        });
-      });
-
-      document.addEventListener("DOMContentLoaded", () => {
-        // Select the Shop link
-        const shopLink = document.querySelector('a[href="shop.html"]');
-
-        // Add a click event listener
-        shopLink.addEventListener("click", (event) => {
-          event.preventDefault();
-
-          console.log("Shop link clicked!");
-
-          // 👉 Example: send event to SalesforceInteractions
-          if (window.SalesforceInteractions) {
-            window.SalesforceInteractions.sendEvent({
-              interaction: {
-                name: "Shop Page",
-              },
-            });
-          }
-
-          // continue with navigation (if you stopped it above)
-          window.location.href = shopLink.getAttribute("href");
+            window.location.href = this.getAttribute("href");
+          });
         });
       });
     </script>
