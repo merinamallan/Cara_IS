@@ -476,51 +476,10 @@
           .addEventListener("click", function (event) {
             event.preventDefault();
             console.log("Shop page clicked!");
+
             if (window.SalesforceInteractions) {
               window.SalesforceInteractions.sendEvent({
                 interaction: { name: "Shop page" },
-              });
-            }
-            window.location.href = this.getAttribute("href");
-          });
-
-        // BLOG
-        document
-          .querySelector('a[href="blog.html"]')
-          .addEventListener("click", function (event) {
-            event.preventDefault();
-            console.log("Blog page clicked!");
-            if (window.SalesforceInteractions) {
-              window.SalesforceInteractions.sendEvent({
-                interaction: { name: "Blog page" },
-              });
-            }
-            window.location.href = this.getAttribute("href");
-          });
-
-        // ABOUT
-        document
-          .querySelector('a[href="about.html"]')
-          .addEventListener("click", function (event) {
-            event.preventDefault();
-            console.log("About page clicked!");
-            if (window.SalesforceInteractions) {
-              window.SalesforceInteractions.sendEvent({
-                interaction: { name: "About page" },
-              });
-            }
-            window.location.href = this.getAttribute("href");
-          });
-
-        // CONTACT
-        document
-          .querySelector('a[href="contact.html"]')
-          .addEventListener("click", function (event) {
-            event.preventDefault();
-            console.log("Contact page clicked!");
-            if (window.SalesforceInteractions) {
-              window.SalesforceInteractions.sendEvent({
-                interaction: { name: "Contact page" },
               });
             }
             window.location.href = this.getAttribute("href");
@@ -531,7 +490,6 @@
           .querySelector('a[href="cart.html"]')
           .addEventListener("click", function (event) {
             event.preventDefault();
-
             if (window.SalesforceInteractions) {
               window.SalesforceInteractions.sendEvent({
                 interaction: { name: "Cart page" },

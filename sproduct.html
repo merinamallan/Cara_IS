@@ -11,6 +11,11 @@
       href="https://cdn.jsdelivr.net/npm/boxicons@latest/css/boxicons.min.css"
     />
     <link rel="stylesheet" href="style.css" />
+
+    <script
+      type="text/javascript"
+      src="//cdn.evgnet.com/beacon/partnercustomercentriaindia/engage/scripts/evergage.min.js"
+    ></script>
   </head>
 
   <body>
@@ -246,6 +251,56 @@
       var MainImg = document.getElementById("MainImg");
       var smallImg = document.getElementsByClassName("small-img");
 
+      document.addEventListener("DOMContentLoaded", () => {
+        try {
+          if (
+            window.SalesforceInteractions &&
+            SalesforceInteractions.sendEvent
+          ) {
+            const productName = document
+              .querySelector(".single-pro-details h4")
+              .innerText.trim();
+            const productPriceText =
+              document.querySelector(".single-pro-details h2").innerText || "";
+            const productPrice =
+              parseFloat(productPriceText.replace(/[^0-9.]/g, "")) || null;
+            const productImage = document.getElementById("MainImg").src || "";
+            const productId =
+              document.querySelector(".single-pro-details").dataset.productId ||
+              productName.toLowerCase().replace(/\s+/g, "-");
+
+            SalesforceInteractions.sendEvent({
+              interaction: {
+                name: SalesforceInteractions.CatalogObjectInteractionName
+                  .ViewCatalogObject,
+                catalogObject: {
+                  id: productId,
+                  type: "product",
+                  attributes: {
+                    name: productName,
+                    price: productPrice,
+                    currency: "INR",
+                    imageUrl: productImage,
+                  },
+                },
+                source: {
+                  channel: "Web",
+                  pageType: "PDP",
+                  url: window.location.href,
+                  urlReferrer: document.referrer,
+                },
+              },
+            });
+            console.log(
+              "Personalization: sent ViewCatalogObject for",
+              productId
+            );
+          }
+        } catch (err) {
+          console.warn("Personalization PDP event failed", err);
+        }
+      });
+
       smallImg[0].onclick = function () {
         MainImg.src = smallImg[0].src;
       };
@@ -298,6 +353,39 @@
 
           // Save back to localStorage
           localStorage.setItem("cartItems", JSON.stringify(cart));
+
+          // send AddToCart event
+          if (
+            window.SalesforceInteractions &&
+            SalesforceInteractions.sendEvent
+          ) {
+            const productId =
+              document.querySelector(".single-pro-details").dataset.productId ||
+              product.name.toLowerCase().replace(/\s+/g, "-");
+            SalesforceInteractions.sendEvent({
+              interaction: {
+                name: SalesforceInteractions.CartInteractionName.AddToCart,
+                lineItem: {
+                  catalogObjectType: "product",
+                  catalogObjectId: productId,
+                  quantity: product.quantity,
+                  price:
+                    parseFloat(product.price.replace(/[^0-9.]/g, "")) || null,
+                  attributes: {
+                    name: product.name,
+                    size: product.size,
+                    imageUrl: product.image,
+                  },
+                },
+                source: {
+                  channel: "Web",
+                  pageType: "PDP",
+                  url: window.location.href,
+                },
+              },
+            });
+            console.log("Personalization: sent AddToCart for", productId);
+          }
 
           alert(`✅ ${product.name} (${size}) added to Cart!`);
 

@@ -11,6 +11,11 @@
       href="https://cdn.jsdelivr.net/npm/boxicons@latest/css/boxicons.min.css"
     />
     <link rel="stylesheet" href="style.css" />
+
+    <script
+      type="text/javascript"
+      src="//cdn.evgnet.com/beacon/partnercustomercentriaindia/engage/scripts/evergage.min.js"
+    ></script>
   </head>
 
   <body>
@@ -386,7 +391,56 @@
       const cartButtons = document.querySelectorAll(".cart");
 
       cartButtons.forEach((btn) => {
-        btn.addEventListener("click", (event) => {
+          btn.addEventListener("click", (event) => {
+            event.preventDefault();
+            const productCard = btn.closest(".pro");
+            const name = productCard.querySelector("h5").innerText.trim();
+            const priceText = productCard.querySelector("h4").innerText || "";
+            const price = parseFloat(priceText.replace(/[^0-9.]/g, "")) || null;
+            const image = productCard.querySelector("img").src;
+            const id =
+              productCard.dataset.productId ||
+              name.toLowerCase().replace(/\s+/g, "-");
+
+            const product = {
+              name,
+              price: priceText,
+              image,
+              quantity: 1,
+            };
+
+            let cart = JSON.parse(localStorage.getItem("cartItems")) || [];
+            cart.push(product);
+            localStorage.setItem("cartItems", JSON.stringify(cart));
+
+            // ---------- send AddToCart to Personalization ----------
+            if (
+              window.SalesforceInteractions &&
+              SalesforceInteractions.sendEvent
+            ) {
+              SalesforceInteractions.sendEvent({
+                interaction: {
+                  name: SalesforceInteractions.CartInteractionName.AddToCart,
+                  lineItem: {
+                    catalogObjectType: "product",
+                    catalogObjectId: id,
+                    quantity: 1,
+                    price: price,
+                    attributes: { name: name, imageUrl: image },
+                  },
+                  source: {
+                    channel: "Web",
+                    pageType: "PLP",
+                    url: window.location.href,
+                  },
+                },
+              });
+              console.log("Personalization: sent AddToCart for", id);
+            }
+
+            alert(`${name} added to cart`);
+          });
+
           event.preventDefault();
 
           // Find the product card of ONLY the clicked button
@@ -413,6 +467,49 @@
           alert(" Select a size first."); // Notify user
 
           // Send data to Evergage
+        });
+      });
+    </script>
+
+    <script>
+      document.addEventListener("DOMContentLoaded", () => {
+        document.querySelectorAll(".pro").forEach((card) => {
+          // skip if clicked on the cart icon
+          card.addEventListener("click", function (e) {
+            if (e.target.closest(".cart")) return;
+
+            const name = this.querySelector("h5").innerText.trim();
+            const priceText = this.querySelector("h4").innerText || "";
+            const price = parseFloat(priceText.replace(/[^0-9.]/g, "")) || null;
+            const id =
+              this.dataset.productId || name.toLowerCase().replace(/\s+/g, "-");
+
+            if (
+              window.SalesforceInteractions &&
+              SalesforceInteractions.sendEvent
+            ) {
+              SalesforceInteractions.sendEvent({
+                interaction: {
+                  name: SalesforceInteractions.CatalogObjectInteractionName
+                    .QuickViewCatalogObject,
+                  catalogObject: {
+                    id: id,
+                    type: "product",
+                    attributes: { name: name, price: price },
+                  },
+                  source: {
+                    channel: "Web",
+                    pageType: "PLP",
+                    url: window.location.href,
+                  },
+                },
+              });
+              console.log("Personalization: PLP click sent for", id);
+            }
+
+            // navigate to product page
+            window.location.href = "sproduct.html";
+          });
         });
       });
     </script>
