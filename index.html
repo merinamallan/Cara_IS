@@ -16,6 +16,35 @@
       type="text/javascript"
       src="//cdn.evgnet.com/beacon/partnercustomercentriaindia/engage/scripts/evergage.min.js"
     ></script>
+
+    <script>
+      // Wait for the Evergage library to load
+      window.Evergage = window.Evergage || [];
+      window.Evergage.push(function (evergage) {
+        "use strict";
+
+        // Determine the page name
+        let pageName;
+        const pathname = window.location.pathname;
+
+        if (pathname.endsWith("/") || pathname.endsWith("index.html")) {
+          pageName = "Home page viewed";
+        } else if (pathname.includes("shop.html")) {
+          pageName = "Shop page viewed";
+        } else if (pathname.includes("cart.html")) {
+          pageName = "Cart page viewed";
+        } else {
+          pageName = "Page viewed: " + pathname;
+        }
+
+        // Send the event using the Evergage object
+        evergage.sendEvent({
+          action: pageName, // This will show as "Home page viewed" in your stream
+        });
+
+        console.log("Evergage event sent:", pageName);
+      });
+    </script>
   </head>
 
   <body>
@@ -456,47 +485,64 @@
 
     <script>
       document.addEventListener("DOMContentLoaded", () => {
-        // HOME
-        document
-          .querySelector('a[href="index.html"]')
-          .addEventListener("click", function (event) {
-            event.preventDefault();
-            console.log("Home page clicked!");
-            if (window.SalesforceInteractions) {
-              window.SalesforceInteractions.sendEvent({
-                interaction: { name: "Home page" },
-              });
-            }
-            window.location.href = this.getAttribute("href");
+        // 1. Click Tracking - FIXED to use Evergage
+        const trackClick = (selector, name) => {
+          const el = document.querySelector(selector);
+          if (el) {
+            el.addEventListener("click", (event) => {
+              // Send the click event via Evergage
+              if (window.Evergage) {
+                window.Evergage.push(function (evergage) {
+                  evergage.sendEvent({
+                    action: name + " clicked",
+                  });
+                });
+              }
+              console.log(`${name} clicked!`);
+
+              // Let the browser navigate naturally
+              // Remove event.preventDefault() and window.location.href
+            });
+          }
+        };
+
+        trackClick('a[href="index.html"]', "Home page");
+        trackClick('a[href="shop.html"]', "Shop page");
+        trackClick('a[href="cart.html"]', "View Cart");
+
+        // 2. Homepage view event is now handled by the code in the <head>
+
+        // 3. Cart Subtotal & Total Update (Keep this code, it's fine)
+        const updateCartSummary = () => {
+          let subtotal = 0;
+          document.querySelectorAll(".pro").forEach((product) => {
+            const priceText = product.querySelector("h4")?.textContent || "₹0";
+            const price = parseInt(priceText.replace("₹", ""));
+            subtotal += price;
           });
 
-        // SHOP
-        document
-          .querySelector('a[href="shop.html"]')
-          .addEventListener("click", function (event) {
-            event.preventDefault();
-            console.log("Shop page clicked!");
+          const subtotalEl = document.querySelector(
+            "#subtotal table tr:nth-child(1) td:nth-child(2)"
+          );
+          const totalEl = document.querySelector(
+            "#subtotal table tr:nth-child(3) td:nth-child(2)"
+          );
 
-            if (window.SalesforceInteractions) {
-              window.SalesforceInteractions.sendEvent({
-                interaction: { name: "Shop page" },
-              });
-            }
-            window.location.href = this.getAttribute("href");
-          });
+          if (subtotalEl) subtotalEl.textContent = "₹" + subtotal;
+          if (totalEl) totalEl.textContent = "₹" + subtotal;
+        };
 
-        // CART
-        document
-          .querySelector('a[href="cart.html"]')
-          .addEventListener("click", function (event) {
-            event.preventDefault();
-            if (window.SalesforceInteractions) {
-              window.SalesforceInteractions.sendEvent({
-                interaction: { name: "Cart page" },
-              });
-            }
-            window.location.href = this.getAttribute("href");
-          });
+        updateCartSummary();
+
+        // 4. View Cart Visibility (Keep this code, it's fine)
+        const viewCartBtn = document.querySelector("#view-cart");
+        if (viewCartBtn) {
+          viewCartBtn.style.display = window.location.pathname.includes(
+            "cart.html"
+          )
+            ? "none"
+            : "block";
+        }
       });
     </script>
   </body>

@@ -253,145 +253,42 @@
 
       document.addEventListener("DOMContentLoaded", () => {
         try {
-          if (
-            window.SalesforceInteractions &&
-            SalesforceInteractions.sendEvent
-          ) {
-            const productName = document
-              .querySelector(".single-pro-details h4")
-              .innerText.trim();
-            const productPriceText =
-              document.querySelector(".single-pro-details h2").innerText || "";
-            const productPrice =
-              parseFloat(productPriceText.replace(/[^0-9.]/g, "")) || null;
-            const productImage = document.getElementById("MainImg").src || "";
-            const productId =
-              document.querySelector(".single-pro-details").dataset.productId ||
-              productName.toLowerCase().replace(/\s+/g, "-");
+          // REPLACE THIS: if (window.SalesforceInteractions && SalesforceInteractions.sendEvent) {
+          // WITH THIS:
+          if (window.Evergage) {
+            window.Evergage.push(function (evergage) {
+              const productName = document
+                .querySelector(".single-pro-details h4")
+                .innerText.trim();
+              const productPriceText =
+                document.querySelector(".single-pro-details h2").innerText ||
+                "";
+              const productPrice =
+                parseFloat(productPriceText.replace(/[^0-9.]/g, "")) || null;
+              const productImage = document.getElementById("MainImg").src || "";
+              const productId =
+                document.querySelector(".single-pro-details").dataset
+                  .productId || productName.toLowerCase().replace(/\s+/g, "-");
 
-            SalesforceInteractions.sendEvent({
-              interaction: {
-                name: SalesforceInteractions.CatalogObjectInteractionName
-                  .ViewCatalogObject,
-                catalogObject: {
-                  id: productId,
-                  type: "product",
-                  attributes: {
-                    name: productName,
-                    price: productPrice,
-                    currency: "INR",
-                    imageUrl: productImage,
-                  },
+              // Use evergage.sendEvent instead of SalesforceInteractions.sendEvent
+              evergage.sendEvent({
+                action: "ViewCatalogObject", // Use a clear action name
+                catalogObjectId: productId,
+                catalogObjectType: "product",
+                attributes: {
+                  name: productName,
+                  price: productPrice,
+                  currency: "INR",
+                  imageUrl: productImage,
                 },
-                source: {
-                  channel: "Web",
-                  pageType: "PDP",
-                  url: window.location.href,
-                  urlReferrer: document.referrer,
-                },
-              },
+              });
+              console.log("Evergage: sent ViewCatalogObject for", productId);
             });
-            console.log(
-              "Personalization: sent ViewCatalogObject for",
-              productId
-            );
           }
         } catch (err) {
-          console.warn("Personalization PDP event failed", err);
+          console.warn("Evergage PDP event failed", err);
         }
       });
-
-      smallImg[0].onclick = function () {
-        MainImg.src = smallImg[0].src;
-      };
-      smallImg[1].onclick = function () {
-        MainImg.src = smallImg[1].src;
-      };
-      smallImg[2].onclick = function () {
-        MainImg.src = smallImg[2].src;
-      };
-      smallImg[3].onclick = function () {
-        MainImg.src = smallImg[3].src;
-      };
-
-      // ================== ADD TO CART (Single Product Page with Size) ==================
-      const addToCartBtn = document.getElementById("add-to-cart");
-
-      if (addToCartBtn) {
-        addToCartBtn.addEventListener("click", () => {
-          // Get product details
-          const productName = document.querySelector(
-            ".single-pro-details h4"
-          ).innerText;
-          const productPrice = document.querySelector(
-            ".single-pro-details h2"
-          ).innerText;
-          const productImage = document.getElementById("MainImg").src;
-          const quantity = document.querySelector(
-            ".single-pro-details input[type='number']"
-          ).value;
-          const size = document.getElementById("size").value;
-
-          if (size === "Select Size") {
-            alert("⚠️ Please select a size before adding to cart.");
-            return;
-          }
-
-          let product = {
-            name: productName,
-            price: productPrice,
-            image: productImage,
-            quantity: parseInt(quantity, 10),
-            size: size,
-          };
-
-          // Get existing cart or create new
-          let cart = JSON.parse(localStorage.getItem("cartItems")) || [];
-
-          // Push new product
-          cart.push(product);
-
-          // Save back to localStorage
-          localStorage.setItem("cartItems", JSON.stringify(cart));
-
-          // send AddToCart event
-          if (
-            window.SalesforceInteractions &&
-            SalesforceInteractions.sendEvent
-          ) {
-            const productId =
-              document.querySelector(".single-pro-details").dataset.productId ||
-              product.name.toLowerCase().replace(/\s+/g, "-");
-            SalesforceInteractions.sendEvent({
-              interaction: {
-                name: SalesforceInteractions.CartInteractionName.AddToCart,
-                lineItem: {
-                  catalogObjectType: "product",
-                  catalogObjectId: productId,
-                  quantity: product.quantity,
-                  price:
-                    parseFloat(product.price.replace(/[^0-9.]/g, "")) || null,
-                  attributes: {
-                    name: product.name,
-                    size: product.size,
-                    imageUrl: product.image,
-                  },
-                },
-                source: {
-                  channel: "Web",
-                  pageType: "PDP",
-                  url: window.location.href,
-                },
-              },
-            });
-            console.log("Personalization: sent AddToCart for", productId);
-          }
-
-          alert(`✅ ${product.name} (${size}) added to Cart!`);
-
-          // Send data to Evergage
-        });
-      }
     </script>
 
     <script src="script.js"></script>
