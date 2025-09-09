@@ -82,29 +82,31 @@ if (window.SalesforceInteractions && SalesforceInteractions.sendEvent) {
   console.log('Personalization: ReplaceCart sent', lineItems);
 }
 
-// WITH THIS:
+// REMOVE the old SalesforceInteractions code and REPLACE with:
 if (window.Evergage) {
   window.Evergage.push(function (evergage) {
     const rows = document.querySelectorAll('#cart tbody tr');
-    const lineItems = Array.from(rows).map(row => {
-      const name = row.querySelector('td:nth-child(2)').innerText.trim();
-      const id = row.dataset.productId || name.toLowerCase().replace(/\s+/g, '-');
-      const price = parseFloat(row.querySelector('td:nth-child(4)').textContent.replace(/[^0-9.]/g,'')) || null;
-      const quantity = parseInt(row.querySelector('input').value, 10) || 1;
-      return {
-        catalogObjectType: 'product',
-        catalogObjectId: id,
-        quantity: quantity,
-        price: price,
-        attributes: { name }
-      };
-    });
+    if (rows.length > 0) {
+      const lineItems = Array.from(rows).map(row => {
+        const name = row.querySelector('td:nth-child(2)').innerText.trim();
+        const id = row.dataset.productId || name.toLowerCase().replace(/\s+/g, '-');
+        const price = parseFloat(row.querySelector('td:nth-child(4)').textContent.replace(/[^0-9.]/g,'')) || null;
+        const quantity = parseInt(row.querySelector('input').value, 10) || 1;
+        return {
+          catalogObjectType: 'product',
+          catalogObjectId: id,
+          quantity: quantity,
+          price: price,
+          attributes: { name }
+        };
+      });
 
-    evergage.sendEvent({
-      action: "Replace Cart",
-      lineItems: lineItems
-    });
-    console.log('Evergage: Replace Cart sent', lineItems);
+      evergage.sendEvent({
+        action: "Cart Updated",
+        lineItems: lineItems
+      });
+      console.log('Evergage: Cart Updated sent', lineItems);
+    }
   });
 }
 
