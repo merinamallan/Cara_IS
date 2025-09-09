@@ -452,27 +452,20 @@
             const id =
               this.dataset.productId || name.toLowerCase().replace(/\s+/g, "-");
 
-            if (
-              window.SalesforceInteractions &&
-              SalesforceInteractions.sendEvent
-            ) {
-              SalesforceInteractions.sendEvent({
-                interaction: {
-                  name: SalesforceInteractions.CatalogObjectInteractionName
-                    .QuickViewCatalogObject,
-                  catalogObject: {
-                    id: id,
-                    type: "product",
-                    attributes: { name: name, price: price },
+            // FIXED: Use Evergage instead of SalesforceInteractions
+            if (window.Evergage) {
+              window.Evergage.push(function (evergage) {
+                evergage.sendEvent({
+                  action: "Product Quick View", // Changed to clear action name
+                  catalogObjectId: id,
+                  catalogObjectType: "product",
+                  attributes: {
+                    name: name,
+                    price: price,
                   },
-                  source: {
-                    channel: "Web",
-                    pageType: "PLP",
-                    url: window.location.href,
-                  },
-                },
+                });
               });
-              console.log("Personalization: PLP click sent for", id);
+              console.log("Evergage: Product Quick View sent for", id);
             }
 
             // navigate to product page

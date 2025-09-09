@@ -484,36 +484,8 @@
     <script src="script.js"></script>
 
     <script>
+      // 2. Cart Subtotal & Total Update (Keep this code, it's fine)
       document.addEventListener("DOMContentLoaded", () => {
-        // 1. Click Tracking - FIXED
-        // This function now only tracks NAVBAR links
-        const trackNavbarClick = (href, name) => {
-          // Find the link in the navbar specifically
-          const selector = `#navbar a[href="${href}"]`;
-          const el = document.querySelector(selector);
-
-          if (el) {
-            el.addEventListener("click", (event) => {
-              // Send the click event
-              if (window.Evergage) {
-                window.Evergage.push(function (evergage) {
-                  evergage.sendEvent({
-                    action: name,
-                  });
-                });
-              }
-              console.log(`${name} event sent`);
-              // Let the browser navigate naturally
-            });
-          }
-        };
-
-        // Apply tracking to NAVBAR links only
-        trackNavbarClick("index.html", "Home link clicked");
-        trackNavbarClick("shop.html", "Shop link clicked");
-        trackNavbarClick("cart.html", "Cart link clicked");
-
-        // 3. Cart Subtotal & Total Update (Keep this code, it's fine)
         const updateCartSummary = () => {
           let subtotal = 0;
           document.querySelectorAll(".pro").forEach((product) => {
@@ -534,16 +506,6 @@
         };
 
         updateCartSummary();
-
-        // 4. View Cart Visibility (Keep this code, it's fine)
-        const viewCartBtn = document.querySelector("#view-cart");
-        if (viewCartBtn) {
-          viewCartBtn.style.display = window.location.pathname.includes(
-            "cart.html"
-          )
-            ? "none"
-            : "block";
-        }
       });
     </script>
   </body>

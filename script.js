@@ -55,7 +55,36 @@ document.addEventListener("DOMContentLoaded", () => {
     document.querySelector("#subtotal table tr:nth-child(3) td:nth-child(2)").textContent = "₹" + subtotal;
   }
 
-  if (window.SalesforceInteractions && SalesforceInteractions.sendEvent) {
+  // REPLACE this block:
+if (window.SalesforceInteractions && SalesforceInteractions.sendEvent) {
+  const rows = document.querySelectorAll('#cart tbody tr');
+  const lineItems = Array.from(rows).map(row => {
+    const name = row.querySelector('td:nth-child(2)').innerText.trim();
+    const id = row.dataset.productId || name.toLowerCase().replace(/\s+/g, '-');
+    const price = parseFloat(row.querySelector('td:nth-child(4)').textContent.replace(/[^0-9.]/g,'')) || null;
+    const quantity = parseInt(row.querySelector('input').value, 10) || 1;
+    return {
+      catalogObjectType: 'product',
+      catalogObjectId: id,
+      quantity: quantity,
+      price: price,
+      attributes: { name }
+    };
+  });
+
+  SalesforceInteractions.sendEvent({
+    interaction: {
+      name: SalesforceInteractions.CartInteractionName.ReplaceCart,
+      lineItems: lineItems,
+      source: { channel: 'Web', pageType: 'Cart', url: window.location.href }
+    }
+  });
+  console.log('Personalization: ReplaceCart sent', lineItems);
+}
+
+// WITH THIS:
+if (window.Evergage) {
+  window.Evergage.push(function (evergage) {
     const rows = document.querySelectorAll('#cart tbody tr');
     const lineItems = Array.from(rows).map(row => {
       const name = row.querySelector('td:nth-child(2)').innerText.trim();
@@ -71,15 +100,13 @@ document.addEventListener("DOMContentLoaded", () => {
       };
     });
 
-    SalesforceInteractions.sendEvent({
-      interaction: {
-        name: SalesforceInteractions.CartInteractionName.ReplaceCart,
-        lineItems: lineItems,
-        source: { channel: 'Web', pageType: 'Cart', url: window.location.href }
-      }
+    evergage.sendEvent({
+      action: "Replace Cart",
+      lineItems: lineItems
     });
-    console.log('Personalization: ReplaceCart sent', lineItems);
-  }
+    console.log('Evergage: Replace Cart sent', lineItems);
+  });
+}
 
 // run once when page loads
 updateSubtotal();
