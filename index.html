@@ -485,32 +485,33 @@
 
     <script>
       document.addEventListener("DOMContentLoaded", () => {
-        // 1. Click Tracking - FIXED to use Evergage
-        const trackClick = (selector, name) => {
+        // 1. Click Tracking - FIXED
+        // This function now only tracks NAVBAR links
+        const trackNavbarClick = (href, name) => {
+          // Find the link in the navbar specifically
+          const selector = `#navbar a[href="${href}"]`;
           const el = document.querySelector(selector);
+
           if (el) {
             el.addEventListener("click", (event) => {
-              // Send the click event via Evergage
+              // Send the click event
               if (window.Evergage) {
                 window.Evergage.push(function (evergage) {
                   evergage.sendEvent({
-                    action: name + " clicked",
+                    action: name,
                   });
                 });
               }
-              console.log(`${name} clicked!`);
-
+              console.log(`${name} event sent`);
               // Let the browser navigate naturally
-              // Remove event.preventDefault() and window.location.href
             });
           }
         };
 
-        trackClick('a[href="index.html"]', "Home page");
-        trackClick('a[href="shop.html"]', "Shop page");
-        trackClick('a[href="cart.html"]', "View Cart");
-
-        // 2. Homepage view event is now handled by the code in the <head>
+        // Apply tracking to NAVBAR links only
+        trackNavbarClick("index.html", "Home link clicked");
+        trackNavbarClick("shop.html", "Shop link clicked");
+        trackNavbarClick("cart.html", "Cart link clicked");
 
         // 3. Cart Subtotal & Total Update (Keep this code, it's fine)
         const updateCartSummary = () => {
