@@ -292,5 +292,73 @@
     </script>
 
     <script src="script.js"></script>
+
+    <script>
+      window.Evergage = window.Evergage || [];
+      window.Evergage.push(function (evergage) {
+        "use strict";
+
+        const pathname = window.location.pathname || "";
+        let pageName = "Page viewed: " + pathname;
+        let pageType = "product";
+
+        // --- Capture product details from the page ---
+        const productName =
+          document.querySelector(".single-pro-details h4")?.innerText.trim() ||
+          "Unknown Product";
+        const productPriceText =
+          document.querySelector(".single-pro-details h2")?.innerText || "₹0";
+        const productPrice =
+          parseFloat(productPriceText.replace(/[^0-9.]/g, "")) || 0;
+        const productImage = document.getElementById("MainImg")?.src || "";
+        const productId = productName.toLowerCase().replace(/\s+/g, "-");
+
+        // --- Send "Product page viewed" event ---
+        const viewPayload = {
+          action: "Product page viewed",
+          catalogObjectId: productId,
+          catalogObjectType: "product",
+          attributes: {
+            name: productName,
+            price: productPrice,
+            currency: "INR",
+            imageUrl: productImage,
+            pageType,
+            pathname,
+          },
+        };
+
+        evergage.sendEvent(viewPayload);
+        console.log("Evergage event sent (Product page viewed):", viewPayload);
+
+        // --- Track "Add to Cart" button click ---
+        const addToCartBtn = document.getElementById("add-to-cart");
+        if (addToCartBtn) {
+          addToCartBtn.addEventListener("click", function () {
+            const addPayload = {
+              action: "AddToCart",
+              catalogObjectId: productId,
+              catalogObjectType: "product",
+              quantity: parseInt(
+                document.querySelector(
+                  ".single-pro-details input[type='number']"
+                )?.value || "1",
+                10
+              ),
+              price: productPrice,
+              attributes: {
+                name: productName,
+                price: productPrice,
+                currency: "INR",
+                imageUrl: productImage,
+              },
+            };
+
+            evergage.sendEvent(addPayload);
+            console.log("Evergage event sent (AddToCart):", addPayload);
+          });
+        }
+      });
+    </script>
   </body>
 </html>

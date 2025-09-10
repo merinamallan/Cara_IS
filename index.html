@@ -16,7 +16,6 @@
       type="text/javascript"
       src="//cdn.evgnet.com/beacon/partnercustomercentriaindia/engage/scripts/evergage.min.js"
     ></script>
-
     <script>
       window.Evergage = window.Evergage || [];
       window.Evergage.push(function (evergage) {
@@ -26,13 +25,13 @@
         let pageName = "Page viewed: " + pathname;
         let pageType = "other";
 
-        if (pathname.endsWith("/") || pathname.endsWith("index.html")) {
+        if (pathname === "/" || pathname.endsWith("index.html")) {
           pageName = "Home page viewed";
           pageType = "home";
-        } else if (pathname.includes("shop.html")) {
+        } else if (pathname.includes("shop.html") || pathname === "/shop") {
           pageName = "Shop page viewed";
           pageType = "shop";
-        } else if (pathname.includes("cart.html")) {
+        } else if (pathname.includes("cart.html") || pathname === "/cart") {
           pageName = "Cart page viewed";
           pageType = "cart";
         } else if (
@@ -43,43 +42,17 @@
           pageType = "product";
         }
 
-        // Use the same helper approach — simple payload
         const payload = {
           action: pageName,
           attributes: {
             pageType,
-            pathname: pathname,
+            pathname,
           },
         };
 
-        try {
-          evergage.sendEvent(payload);
-          console.log("Evergage event sent:", payload);
-        } catch (e) {
-          console.warn("Evergage sendEvent failed:", e, payload);
-        }
+        evergage.sendEvent(payload);
+        console.log("Evergage event sent:", payload);
       });
-
-      // Determine the page name
-      let pageName;
-      const pathname = window.location.pathname;
-
-      if (pathname.endsWith("/") || pathname.endsWith("index.html")) {
-        pageName = "Home page viewed";
-      } else if (pathname.includes("shop.html")) {
-        pageName = "Shop page viewed";
-      } else if (pathname.includes("cart.html")) {
-        pageName = "Cart page viewed";
-      } else {
-        pageName = "Page viewed: " + pathname;
-      }
-
-      // Send the event using the Evergage object
-      evergage.sendEvent({
-        action: pageName, // This will show as "Home page viewed" in your stream
-      });
-
-      console.log("Evergage event sent:", pageName);
     </script>
   </head>
 

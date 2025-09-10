@@ -390,19 +390,18 @@
       document.addEventListener("DOMContentLoaded", () => {
         document.querySelectorAll(".pro").forEach((card) => {
           card.addEventListener("click", function (e) {
-            // If clicked on the cart icon, handle cart addition
+            const name =
+              this.querySelector("h5")?.innerText.trim() || "Unknown Product";
+            const priceText = this.querySelector("h4")?.innerText || "₹0";
+            const price = parseFloat(priceText.replace(/[^0-9.]/g, "")) || 0;
+            const image = this.querySelector("img")?.src || "";
+            const id =
+              this.dataset.productId || name.toLowerCase().replace(/\s+/g, "-");
+
+            // --- Case 1: Clicked on the cart icon ---
             if (e.target.closest(".cart")) {
               e.preventDefault();
               e.stopPropagation();
-
-              const name = this.querySelector("h5").innerText.trim();
-              const priceText = this.querySelector("h4").innerText || "";
-              const price =
-                parseFloat(priceText.replace(/[^0-9.]/g, "")) || null;
-              const image = this.querySelector("img").src;
-              const id =
-                this.dataset.productId ||
-                name.toLowerCase().replace(/\s+/g, "-");
 
               const product = {
                 name,
@@ -430,40 +429,60 @@
                     },
                   });
                 });
-                console.log("Evergage: sent AddToCart for", id);
+                console.log("Evergage event sent (AddToCart):", id);
               }
 
               alert(`${name} added to cart`);
-              return; // Stop here, don't navigate to product page
+              return; // stop here, don't go to product page
             }
 
-            // If clicked anywhere else on the product card, go to product page
-            const name = this.querySelector("h5").innerText.trim();
-            const priceText = this.querySelector("h4").innerText || "";
-            const price = parseFloat(priceText.replace(/[^0-9.]/g, "")) || null;
-            const id =
-              this.dataset.productId || name.toLowerCase().replace(/\s+/g, "-");
-
-            // Send Product View event
+            // --- Case 2: Clicked on product card (not cart icon) ---
             if (window.Evergage) {
               window.Evergage.push(function (evergage) {
                 evergage.sendEvent({
-                  action: "Product View Click",
+                  action: "Product clicked",
                   catalogObjectId: id,
                   catalogObjectType: "product",
                   attributes: {
                     name: name,
                     price: price,
+                    imageUrl: image,
                   },
                 });
               });
-              console.log("Evergage: Product View Click sent for", id);
+              console.log("Evergage event sent (Product clicked):", id);
             }
 
-            // navigate to product page
+            // Then navigate to product detail page
             window.location.href = "sproduct.html";
           });
         });
+      });
+    </script>
+    <script>
+      window.Evergage = window.Evergage || [];
+      window.Evergage.push(function (evergage) {
+        "use strict";
+
+        const pathname = window.location.pathname || "";
+        let pageName = "Page viewed: " + pathname;
+        let pageType = "other";
+
+        if (pathname.includes("shop.html") || pathname === "/shop") {
+          pageName = "Shop page viewed";
+          pageType = "shop";
+        }
+
+        const payload = {
+          action: pageName,
+          attributes: {
+            pageType,
+            pathname,
+          },
+        };
+
+        evergage.sendEvent(payload);
+        console.log("Evergage event sent:", payload);
       });
     </script>
   </body>

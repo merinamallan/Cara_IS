@@ -221,5 +221,32 @@
         });
       }
     </script>
+
+    <script>
+      window.Evergage = window.Evergage || [];
+      window.Evergage.push(function (evergage) {
+        "use strict";
+
+        const pathname = window.location.pathname || "";
+        let pageName = "Page viewed: " + pathname;
+        let pageType = "other";
+
+        if (pathname.includes("cart.html") || pathname === "/cart") {
+          pageName = "Cart page viewed";
+          pageType = "cart";
+        }
+
+        const payload = {
+          action: pageName,
+          attributes: {
+            pageType,
+            pathname,
+          },
+        };
+
+        evergage.sendEvent(payload);
+        console.log("Evergage event sent:", payload);
+      });
+    </script>
   </body>
 </html>
