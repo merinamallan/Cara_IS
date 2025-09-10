@@ -1,124 +1,130 @@
+// script.js - safe, drop-in replacement
+
 const bar = document.getElementById('bar');
 const close = document.getElementById('close');
 const nav = document.getElementById('navbar');
 
-if(bar) {
-  bar.addEventListener('click', () => {
-    nav.classList.add('active');
-  })
-};
+if (bar) {
+  bar.addEventListener('click', () => nav.classList.add('active'));
+}
+if (close) {
+  close.addEventListener('click', () => nav.classList.remove('active'));
+}
 
-if(close) {
-  close.addEventListener('click', () => {
-    nav.classList.remove('active');
-  })
-};
+/**
+ * Helper: safe wrapper to send events to Evergage.
+ * - Logs payload for debugging.
+ * - Honors window.EVERGAGE_SUPPRESS_SEND (set true to only log, not send).
+ */
+function sendEvergageEvent(payload) {
+  try {
+    console.log('[Evergage] payload prepared:', payload);
 
-document.addEventListener("DOMContentLoaded", () => {
-  // Select all remove buttons (❌ icons)
-  const removeButtons = document.querySelectorAll(".bx-x-circle");
+    // If the page wants to suppress sends for debugging, don't call the SDK.
+    if (window.EVERGAGE_SUPPRESS_SEND) {
+      console.log('[Evergage] send suppressed by EVERGAGE_SUPPRESS_SEND flag.');
+      return;
+    }
 
+    if (window.Evergage && typeof window.Evergage.push === 'function') {
+      window.Evergage.push(function (evergage) {
+        try {
+          evergage.sendEvent(payload);
+          console.log('[Evergage] event pushed:', payload.action || payload);
+        } catch (err) {
+          console.warn('[Evergage] sendEvent failed', err, payload);
+        }
+      });
+    } else {
+      console.warn('[Evergage] SDK not available yet; event not sent:', payload);
+    }
+  } catch (err) {
+    console.error('[Evergage] send wrapper error', err, payload);
+  }
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+  // ---------- cart UI logic ----------
+  const removeButtons = document.querySelectorAll('.bx-x-circle');
   removeButtons.forEach((button) => {
-    button.addEventListener("click", function () {
-      const row = this.closest("tr");
-      row.remove();
-      updateSubtotal();
+    button.addEventListener('click', function () {
+      const row = this.closest('tr');
+      if (row) {
+        row.remove();
+        updateSubtotal();
+      }
     });
   });
 
-  // Add listener for quantity changes
-  const qtyInputs = document.querySelectorAll("#cart input[type='number']");
-  qtyInputs.forEach((input) => {
-    input.addEventListener("change", updateSubtotal);
-  });
+  const qtyInputs = document.querySelectorAll('#cart input[type="number"]');
+  qtyInputs.forEach((input) => input.addEventListener('change', updateSubtotal));
 
-  // Function to recalculate subtotal
   function updateSubtotal() {
     let subtotal = 0;
-    const rows = document.querySelectorAll("#cart tbody tr");
-
+    const rows = document.querySelectorAll('#cart tbody tr');
     rows.forEach((row) => {
-      // get price from 4th column
-      const priceText = row.querySelector("td:nth-child(4)").textContent.replace("₹", "");
-      const quantity = row.querySelector("input").value;
-      const price = parseFloat(priceText);
-
+      const priceText = (row.querySelector('td:nth-child(4)')?.textContent || '').replace(/[^0-9.]/g, '');
+      const quantity = parseInt(row.querySelector('input')?.value || '0', 10) || 0;
+      const price = parseFloat(priceText) || 0;
       const rowTotal = price * quantity;
       subtotal += rowTotal;
-
-      // update row subtotal (6th column)
-      row.querySelector("td:nth-child(6)").textContent = "₹" + rowTotal;
+      const cell = row.querySelector('td:nth-child(6)');
+      if (cell) cell.textContent = '₹' + rowTotal;
     });
 
-    // Update subtotal & total in Cart Summary
-    document.querySelector("#subtotal table tr:nth-child(1) td:nth-child(2)").textContent = "₹" + subtotal;
-    document.querySelector("#subtotal table tr:nth-child(3) td:nth-child(2)").textContent = "₹" + subtotal;
+    const subtotalEl = document.querySelector('#subtotal table tr:nth-child(1) td:nth-child(2)');
+    const totalEl = document.querySelector('#subtotal table tr:nth-child(3) td:nth-child(2)');
+    if (subtotalEl) subtotalEl.textContent = '₹' + subtotal;
+    if (totalEl) totalEl.textContent = '₹' + subtotal;
   }
 
-  // REPLACE this block:
-if (window.SalesforceInteractions && SalesforceInteractions.sendEvent) {
-  const rows = document.querySelectorAll('#cart tbody tr');
-  const lineItems = Array.from(rows).map(row => {
-    const name = row.querySelector('td:nth-child(2)').innerText.trim();
-    const id = row.dataset.productId || name.toLowerCase().replace(/\s+/g, '-');
-    const price = parseFloat(row.querySelector('td:nth-child(4)').textContent.replace(/[^0-9.]/g,'')) || null;
-    const quantity = parseInt(row.querySelector('input').value, 10) || 1;
-    return {
-      catalogObjectType: 'product',
-      catalogObjectId: id,
-      quantity: quantity,
-      price: price,
-      attributes: { name }
-    };
-  });
+  // Run once on load
+  updateSubtotal();
 
-  SalesforceInteractions.sendEvent({
-    interaction: {
-      name: SalesforceInteractions.CartInteractionName.ReplaceCart,
+  // ---------- Evergage cart event: only run on cart page ----------
+  (function sendCartEventIfOnCartPage() {
+    // Identify cart page: either pathname includes cart.html OR DOM has #cart tbody with rows
+    const isCartPath = window.location.pathname.includes('cart.html');
+    const cartTableBody = document.querySelector('#cart tbody');
+    const hasCartRows = cartTableBody && cartTableBody.querySelectorAll('tr').length > 0;
+
+    if (!isCartPath && !hasCartRows) {
+      // Not a cart context — do not send cart events.
+      console.log('[CartEventGuard] not a cart page or no cart rows; skipping cart event.');
+      return;
+    }
+
+    const rows = Array.from(cartTableBody ? cartTableBody.querySelectorAll('tr') : []);
+    if (rows.length === 0) {
+      console.log('[CartEventGuard] no rows found in cart table; skipping cart event.');
+      return;
+    }
+
+    const lineItems = rows.map((row) => {
+      const name = (row.querySelector('td:nth-child(2)')?.innerText || '').trim();
+      const id = row.dataset.productId || (name ? name.toLowerCase().replace(/\s+/g, '-') : 'unknown-product');
+      const price = parseFloat((row.querySelector('td:nth-child(4)')?.textContent || '').replace(/[^0-9.]/g, '')) || null;
+      const quantity = parseInt(row.querySelector('input')?.value || '1', 10) || 1;
+      return {
+        catalogObjectType: 'product',
+        catalogObjectId: id,
+        quantity,
+        price,
+        attributes: { name },
+      };
+    });
+
+    if (lineItems.length === 0) {
+      console.log('[CartEventGuard] no line items built; skipping cart event.');
+      return;
+    }
+
+    const payload = {
+      action: 'Cart Updated',
       lineItems: lineItems,
-      source: { channel: 'Web', pageType: 'Cart', url: window.location.href }
-    }
-  });
-  console.log('Personalization: ReplaceCart sent', lineItems);
-}
+      source: { channel: 'Web', pageType: 'Cart', url: window.location.href },
+    };
 
-// REMOVE the old SalesforceInteractions code and REPLACE with:
-if (window.Evergage) {
-  window.Evergage.push(function (evergage) {
-    const rows = document.querySelectorAll('#cart tbody tr');
-    if (rows.length > 0) {
-      const lineItems = Array.from(rows).map(row => {
-        const name = row.querySelector('td:nth-child(2)').innerText.trim();
-        const id = row.dataset.productId || name.toLowerCase().replace(/\s+/g, '-');
-        const price = parseFloat(row.querySelector('td:nth-child(4)').textContent.replace(/[^0-9.]/g,'')) || null;
-        const quantity = parseInt(row.querySelector('input').value, 10) || 1;
-        return {
-          catalogObjectType: 'product',
-          catalogObjectId: id,
-          quantity: quantity,
-          price: price,
-          attributes: { name }
-        };
-      });
-
-      evergage.sendEvent({
-        action: "Cart Updated",
-        lineItems: lineItems
-      });
-      console.log('Evergage: Cart Updated sent', lineItems);
-    }
-  });
-}
-
-// run once when page loads
-updateSubtotal();
-
+    sendEvergageEvent(payload);
+  })();
 });
-
-
-
-
-
-
-
-
