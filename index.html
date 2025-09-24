@@ -16,44 +16,6 @@
       type="text/javascript"
       src="//cdn.evgnet.com/beacon/partnercustomercentriaindia/engage/scripts/evergage.min.js"
     ></script>
-    <script>
-      window.Evergage = window.Evergage || [];
-      window.Evergage.push(function (evergage) {
-        "use strict";
-
-        const pathname = window.location.pathname || "";
-        let pageName = "Page viewed: " + pathname;
-        let pageType = "other";
-
-        if (pathname === "/" || pathname.endsWith("index.html")) {
-          pageName = "Home page viewed";
-          pageType = "home";
-        } else if (pathname.includes("shop.html") || pathname === "/shop") {
-          pageName = "Shop page viewed";
-          pageType = "shop";
-        } else if (pathname.includes("cart.html") || pathname === "/cart") {
-          pageName = "Cart page viewed";
-          pageType = "cart";
-        } else if (
-          pathname.includes("sproduct.html") ||
-          pathname.includes("product")
-        ) {
-          pageName = "Product page viewed";
-          pageType = "product";
-        }
-
-        const payload = {
-          action: pageName,
-          attributes: {
-            pageType,
-            pathname,
-          },
-        };
-
-        evergage.sendEvent(payload);
-        console.log("Evergage event sent:", payload);
-      });
-    </script>
   </head>
 
   <body>
@@ -493,6 +455,43 @@
     <script src="script.js"></script>
 
     <script>
+      // window.Evergage = window.Evergage || [];
+      // window.Evergage.push(function (evergage) {
+      //   "use strict";
+
+      //   const pathname = window.location.pathname || "";
+      //   let pageName = "Page viewed: " + pathname;
+      //   let pageType = "other";
+
+      //   if (pathname === "/" || pathname.endsWith("index.html")) {
+      //     pageName = "Home page viewed";
+      //     pageType = "home";
+      //   } else if (pathname.includes("shop.html") || pathname === "/shop") {
+      //     pageName = "Shop page viewed";
+      //     pageType = "shop";
+      //   } else if (pathname.includes("cart.html") || pathname === "/cart") {
+      //     pageName = "Cart page viewed";
+      //     pageType = "cart";
+      //   } else if (
+      //     pathname.includes("sproduct.html") ||
+      //     pathname.includes("product")
+      //   ) {
+      //     pageName = "Product page viewed";
+      //     pageType = "product";
+      //   }
+
+      //   const payload = {
+      //     action: pageName,
+      //     attributes: {
+      //       pageType,
+      //       pathname,
+      //     },
+      //   };
+
+      //   evergage.sendEvent(payload);
+      //   console.log("Evergage event sent:", payload);
+      // });
+
       // 2. Cart Subtotal & Total Update (Keep this code, it's fine)
       document.addEventListener("DOMContentLoaded", () => {
         const updateCartSummary = () => {
