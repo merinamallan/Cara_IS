@@ -457,6 +457,14 @@
     <script src="script.js"></script>
 
     <script>
+      // 1. Home Button Click Event
+      function onClickHome() {
+        window.location.href = "index.html";
+        if (window.Evergage) {
+          window.Evergage.sendEvent("home_button_clicked");
+        }
+      }
+
       // 2. Cart Subtotal & Total Update (Keep this code, it's fine)
       document.addEventListener("DOMContentLoaded", () => {
         const updateCartSummary = () => {
@@ -480,11 +488,6 @@
 
         updateCartSummary();
       });
-      function onClickHome() {
-        if (window.Evergage) {
-          Evergage.sendEvent("homeClicked");
-        }
-      }
     </script>
   </body>
 </html>
